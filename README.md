@@ -25,7 +25,7 @@ All the assambly codes in this repository are based on **x86_64**.
 5. Stack Pointer register **SP**  
         Pointer to the top of the stack.
 6. Stack Base Pointer register **BP**  
-        Used to point to the base of the stack.
+        Used to point to the base of the stack (stack frame).
 7. Source Index register **SI**  
         Used as a pointer to a source in stream operations.
 8. Destination Index register **DI**  
@@ -34,7 +34,7 @@ All the assambly codes in this repository are based on **x86_64**.
 In x86_64, there are eight more GPRs (**R8** ~ **R15**).  
 
 
-All registers can be accessed in **8-bit**, **16-bit**, **32-bit** and **64-bit** modes.
+All registers can be accessed in **16-bit** and **32-bit** modes.
 ```
    8+8 bits   |___AL___|___AH___|
    16 bits    |_______AX________|
@@ -52,6 +52,10 @@ In the other hand, we can only read the lower part of register.
     mov  AX,  0x1           ; RAX = 0x00000001
 ```
 
+### Instruction Pointer
+
+The **EIP** reg contains the address of the next instruction to be executed.
+> EIP can only be read through the stack after a `call` instruction.
 
 ## Tools
 
