@@ -32,15 +32,23 @@ All the assambly codes in this repository are based on **x86_64**.
         Used as a pointer to a destination in stream operations.
 
 
-In x86_64, there are eight more GPRs (i.e. **R8** ~ **R15**).
+In x86_64, there are eight more GPRs (**R8** ~ **R15**).  
+
 
 All registers can be accessed in **8-bit**, **16-bit**, **32-bit** and **64-bit** modes.
 ```
-              
-   8+8 bits   |   AL   |   AH   |
-   16 bits    |       AX        |
-   32 bits    |        |      EAX                |
-   64 bits    |        |        |               RAX                                  |
+   8+8 bits   |___AL___|___AH___|
+   16 bits    |_______AX________|
+   32 bits    |_________________EAX_________________|
+   64 bits    |_____________________________________RAX_____________________________________|
+```
+
+Write to AX will overwrite all the register value.
+In the other hand, we can only read the lower part of register.
+```asm
+    mov  EAX, 0xffff    ; RAX = 0xffff
+    mov  BX, AX         ; RBX = 0xffff
+    mov  AX, 0x1        ; RAX = 0x1
 ```
 
 
