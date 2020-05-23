@@ -31,7 +31,6 @@ All the assambly codes in this repository are based on **x86_64**.
 8. Destination Index register **DI**  
         Used as a pointer to a destination in stream operations.
 
-
 In x86_64, there are eight more GPRs (**R8** ~ **R15**).  
 
 
@@ -43,12 +42,14 @@ All registers can be accessed in **8-bit**, **16-bit**, **32-bit** and **64-bit*
    64 bits    |_____________________________________RAX_____________________________________|
 ```
 
+### Write/Read Register
+
 Write to AX will overwrite all the register value.
 In the other hand, we can only read the lower part of register.
 ```asm
-    mov  EAX, 0xffff    ; RAX = 0xffff
-    mov  BX, AX         ; RBX = 0xffff
-    mov  AX, 0x1        ; RAX = 0x1
+    mov  RAX, 0xffffffff    ; RAX = 0xffffffff
+    mov  EBX, EAX           ; RBX = 0x0000ffff
+    mov  AX,  0x1           ; RAX = 0x00000001
 ```
 
 
