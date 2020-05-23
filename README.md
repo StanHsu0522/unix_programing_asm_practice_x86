@@ -31,7 +31,7 @@ All the assambly codes in this repository are based on **x86_64**.
 8. Destination Index **DI**  
         Used as a pointer to a destination in stream operations.
 
-> In x86_64, there are eight more GPRs (**R8** ~ **R15**).  
+    > In x86_64, there are eight more GPRs (**R8** ~ **R15**).  
 
 
 All registers can be accessed in **16-bit** and **32-bit** modes:  
