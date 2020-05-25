@@ -1,16 +1,6 @@
 # x86 ASM Language
 
-### Reference
-
-Assembly Language for x86 Processors, 8/e (2019)  
-[Tutorialspoint](https://www.tutorialspoint.com/assembly_programming/)
-
-
-### Architecture
-
 All the assambly codes in this repository are based on **x86_64**.
-
-
 
 ## General Purpose Registers (GPRs)
 
@@ -31,15 +21,16 @@ All the assambly codes in this repository are based on **x86_64**.
 8. Destination Index **DI**  
         Used as a pointer to a destination in stream operations.
 
-    > In x86_64, there are eight more GPRs (**R8** ~ **R15**).  
+> In x86_64, there are eight additional GPRs (**R8** ~ **R15**).  
 
 
 All registers can be accessed in **16-bit** and **32-bit** modes:  
 ```
-   8+8 bits   |___AL___|___AH___|
-   16 bits    |_______AX________|
-   32 bits    |_________________EAX_________________|
+   8+8 bits                                                               |___AL___|___AH___|
+   16 bits                                                                |_______ AX_______|
+   32 bits                                            |_________________EAX_________________|
    64 bits    |_____________________________________RAX_____________________________________|
+              High                                                                        Low
 ```
 
 ### Instruction Pointer Register
@@ -49,12 +40,30 @@ The **RIP** reg contains the address of the next instruction to be executed.
 
 ### Write/Read Register
 
-Write to AX will overwrite all the register value.
-In the other hand, we can only read the lower part of register.
+In [Intel® 64 and IA-32 Architectures Software Developer's Manual](https://www.intel.com.tw/content/www/tw/zh/architecture-and-technology/64-ia-32-architectures-software-developer-vol-1-manual.html), it said
+
+> * 64-bit operands generate a 64-bit result in the destination general-purpose register.
+> * 32-bit operands generate a 32-bit result, zero-extended to a 64-bit result in the destination general-purpose register.
+> * 8-bit and 16-bit operands generate an 8-bit or 16-bit result. The upper 56 bits or 48 bits (respectively) of the destination general-purpose register are not be modified by the operation. If the result of an 8-bit or 16-bit operation is intended for 64-bit address calculation, explicitly sign-extend the register to the full 64-bits.
+
+Write the partial register (i.e. `EAX`) will zero upper 32 bits of `RAX` register.
+
 ```asm
-    mov  RAX, 0xffffffff    ; RAX = 0xffffffff
-    mov  EBX, EAX           ; RBX = 0x0000ffff
-    mov  AX,  0x1           ; RAX = 0x00000001
+    ; initialize
+    mov RBX, 0xffffffffffffffff ; rbx = 0xffffffffffffffff
+    mov RAX, 0                  ; rax = 0x0000000000000000
+
+    mov EBX, EAX                ; rbx = 0x0000000000000000
+```
+
+But in the 32-bit mode will not have the same result in 64-bit mode.
+
+```asm
+    ; initialize
+    mov RBX, 0xffffffffffffffff ; rbx = 0xffffffffffffffff
+    mov RAX, 0                  ; rax = 0x0000000000000000
+
+    mov BX,  AX                 ; rbx = 0xffffffffffff0000
 ```
 
 ## Tools
@@ -78,3 +87,9 @@ Linker (ld):
 
 Debugger (gdb-peda):  
 **[PEDA](https://github.com/longld/peda)** (Python Exploit Development Assistance for GDB)
+
+## References
+
+Assembly Language for x86 Processors, 8/e (2019)  
+[Tutorialspoint](https://www.tutorialspoint.com/assembly_programming/)
+[Intel 64 and IA-32 Architectures Software Developer's Manual (Volume 1)](https://www.intel.com.tw/content/www/tw/zh/architecture-and-technology/64-ia-32-architectures-software-developer-vol-1-manual.html)
