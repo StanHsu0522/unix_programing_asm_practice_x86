@@ -34,11 +34,11 @@ All the assambly codes in this repository are based on **x86_64**.
 
 In 64-bit mode, all these registers can be accessed at the **8-bit (byte)**, **16-bit (word)**, **32-bit (dword)** and **64-bit (qword)** level:  
 ```
-  High                                                                        Low
                                                               |___AL___|___AH___|   8+8 bits
                                                               |_______ AX_______|   16 bits 
                                           |_________________EAX_________________|   32 bits 
   |_____________________________________RAX_____________________________________|   64 bits 
+  High                                                                        Low
 ```
 
 #### Access Register
@@ -88,18 +88,29 @@ But, in 32-bit mode will not have the same result in 64-bit mode:
 The 32-bit EFLAGS register contains a group of status flags, a control flag, and a group of system flags.  
 
 * Status Flags  
-        1. Carry flag `CF` (bit 0): Set if an arithmetic operation generates a carry or a borrow out of the most-significant bit of the result; cleared otherwise.  
-        2. Parity flag `PF` (bit 2): Set if the least-significant byte of the result contains an even number of 1 bits; cleared otherwise.  
+        1. Carry flag `CF` (bit 0)  
+            Set if an arithmetic operation generates a carry or a borrow out of the most-significant bit of the result; cleared otherwise.  
+        2. Parity flag `PF` (bit 2)  
+            Set if the least-significant byte of the result contains an even number of 1 bits; cleared otherwise.  
         3. Auxiliary Carry flag `AF` (bit 4)  
-        4. Zero flag `ZF` (bit 6): Set if the result is zero; cleared otherwise.  
-        5. Sign flag `SF` (bit 7): Set equal to the most-significant bit of the result, which is the sign bit of a signed integer. (0 indicates a positive value and 1 indicates a negative value.)  
-        6. Overflow flag `OF` (bit 11): Set if the integer result is too large a positive number or too small a negative number to fit in the destination operand; cleared otherwise.  
+        4. Zero flag `ZF` (bit 6)  
+            Set if the result is zero; cleared otherwise.  
+        5. Sign flag `SF` (bit 7)  
+            Set equal to the most-significant bit of the result, which is the sign bit of a signed integer. (0 indicates a positive value and 1 indicates a negative value.)  
+        6. Overflow flag `OF` (bit 11)  
+            Set if the integer result is **too large** a positive number or **too small** a negative number to fit in the destination operand; cleared otherwise.  
 * Control Flags  
+    ...   
+    (omited)  
+    ...  
 
 * System Flags  
+    ...  
+    (omited)  
+    ...  
 
-> In 64-bit mode, `EFLAGS` is extended to 64 bits and called `RFLAGS`. 
-> The upper 32 bits of RFLAGS register is reserved. The lower 32 bits of RFLAGS is the same as EFLAGS.
+> In 64-bit mode, `EFLAGS` is extended to 64 bits and called `RFLAGS`.  
+> The upper 32 bits of `RFLAGS` register is reserved. The lower 32 bits of `RFLAGS` is the same as `EFLAGS`.
 
 ### Instruction Pointer Register
 
@@ -113,25 +124,106 @@ The `EIP` register contains the offset in the current code segment for the next 
 
 
 
-## Assembly Instructions
+## General-Purpose Instructions
 
-### Data Movement
+### Data Transfer Instructions
 
 ```asm
-    mov dst, src
+    MOV    dst, src    ; move data from src to dst
+    XCHG   dst, src    ; exchange
+    MOVZX  dst, src    ; move and sign extend
+    MOVSX  dst, src    ; move and zero extend
 ```
 
-### Simple Arithmetic
+```asm
+    MOV eax, [ebx + ecx*4 + 4]  ; can be *1, *2, *4, *8
+    MOV eax, [0x600000]         ; This will dereference with 0x600000 as a memory address
+                                ; and mov from 0x600000-0x600004 since eax is 4-byte wide.
+```
+
+### Binary Arithmetic Instructions
+
+```asm
+    ADD   dst, src    ; add
+    SUB   dst, src    ; substract
+    MUL   dst, src    ; unsigned multiply
+    IMUL  dst, src    ; signed multiply
+    DIV   dst, src    ; unsigned divide
+    IDIV  dst, src    ; signed divide
+    INC   dst, src    ; increment
+    DEC   dst, src    ; decrement
+    NEG   dst         ; NOT dst
+                      ; INC dst
+
+    CMP   dst, src    ; compare
+```
+
+```asm
+    INC  [0x600000]             ; This is invalid.
+    INC  DWORD PTR [0x600000]   ; PTR is required on MASM/gas, 
+                                ; but cannot be used on yasm/nasm.
+```
+
+### Logical Instructions
+
+```asm
+    AND  dst, src
+    OR   dst, src
+    XOR  dst, src
+    NOT  dst, src
+```
+
+```asm
+    XOR  src, src       ; clear the content
+    AND  ax, 0x1110     ; isolate 15-4 bits (zero based)
+```
+
+### Shift & Rotate Instructions
+
+```asm
+    SHR  dst, imm    ; shift logical right
+    SHL  dst, imm
+    SAR  dst, imm    ; shift arithmetic right
+    SAL  dst, imm
+
+    ROR  dst, imm    ; rotate right
+    ROL  dst, imm
+    RCR  dst, imm    ; rotate through carry right
+    RCL  dst, imm 
+```
+
+```asm
+    SHL eax, 1      ; eax = eax * 2
+    SHL eax, 2      ; eax = eax * 4
+
+    SAL dst, imm    ; SHL dst, imm
 
 
 
-### Shift & Rotate
+            (CF)     3  2  1  0   
+            +--+  +--+--+--+--+   
+    SHL     |  |  |  |  |  |  |  0
+            +--+  +--+--+--+--+
+             ⇐ ⇐ ⇐ ⇐ ⇐ ⇐ ⇐ ⇐ ⇐ ⇐ ⇐
 
 
+                 3  2  1  0  (CF)
+              +--+--+--+--+  +--+
+    SHR     0 |  |  |  |  |  |  |
+              +--+--+--+--+  +--+
+            ⇒ ⇒ ⇒ ⇒ ⇒ ⇒ ⇒ ⇒ ⇒ ⇒  
 
-### Mutiplication & Division
+
+                  3  2  1  0  (CF)
+               +--+--+--+--+  +--+
+    SAR     ⇑⇒⇒|  |  |  |  |  |  |
+            ⇑  +--+--+--+--+  +--+
+            ⇑   ⇓⇒ ⇒ ⇒ ⇒ ⇒ ⇒ ⇒ ⇒  
+            ⇐⇐⇐⇐⇐                 
+```
 
 
+### Mutiplication & Division Instructions
 
 
 
